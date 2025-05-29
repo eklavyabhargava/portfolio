@@ -1,0 +1,67 @@
+name: Deploy to Firebase Hosting on merge
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      # Setup Yarn
+      - name: Enable Yarn
+        run: corepack enable
+
+      # Setup Firebase CLI
+      - name: Setup Firebase CLI
+        run: yarn global add firebase-tools
+
+      # Manually Create Firebase Service Account JSON from individual secrets
+      - name: Setup Firebase Authentication
+        run: |
+          echo "{
+            \"type\": \"service_account\",
+            \"project_id\": \"eklavya-portfolio\",
+            \"private_key_id\": \"${{ secrets.PRIVATE_KEY_ID }}\",
+            \"private_key\": \"${{ secrets.PRIVATE_KEY }}\",
+            \"client_email\": \"${{ secrets.CLIENT_EMAIL }}\",
+            \"client_id\": \"${{ secrets.CLIENT_ID }}\",
+            \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",
+            \"token_uri\": \"https://oauth2.googleapis.com/token\",
+            \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",
+            \"client_x509_cert_url\": \"${{ secrets.CLIENT_X509_CERT_URL }}\"
+          }" > "${HOME}/firebase-key.json"
+          
+          export GOOGLE_APPLICATION_CREDENTIALS="${HOME}/firebase-key.json"
+          firebase functions:config:get --project eklavya-portfolio > .runtimeconfig.json
+
+      # Create .env file
+      - name: Create .env file
+        run: |
+          touch .env
+          jq -r '.envs | to_entries[] | "\(.key | ascii_upcase)=\(.value)"' .runtimeconfig.json >> .env
+
+      # Install dependencies and build the project
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Build the project
+      - name: Build project
+        run: yarn build
+
+      # Deploy to Firebase Hosting
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: eklavya-portfolio
