@@ -339,7 +339,7 @@ const Portfolio = () => {
                 <Mail className="w-6 h-6" />
               </a>
               <a
-                href="#"
+                href="https://github.com/eklavyabhargava"
                 className="text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors"
               >
                 <Github className="w-6 h-6" />
