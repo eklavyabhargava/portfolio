@@ -784,7 +784,7 @@ const Portfolio = () => {
                 darkMode ? "bg-gray-800" : "bg-white"
               } shadow-lg relative overflow-hidden`}
             >
-              <div className="relative h-[500px]">
+              <div className="relative md:h-[500px] h-[550px]">
                 {/* Contact Form */}
                 <div
                   className={`absolute inset-0 transition-all duration-500 ease-in-out ${
