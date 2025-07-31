@@ -21,6 +21,7 @@ import {
 
 const Portfolio = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [isSystemTheme, setIsSystemTheme] = useState(true);
   const [activeSection, setActiveSection] = useState("hero");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [formData, setFormData] = useState({
@@ -40,16 +41,27 @@ const Portfolio = () => {
     // Set initial state based on system preference
     setDarkMode(mediaQuery.matches);
 
-    // Listen for changes in system theme
+    // Listen for changes in system theme only if using system theme
     const handleThemeChange = (e: MediaQueryListEvent) => {
-      setDarkMode(e.matches);
+      if (isSystemTheme) {
+        setDarkMode(e.matches);
+      }
     };
 
     mediaQuery.addEventListener("change", handleThemeChange);
 
     // Cleanup listener on unmount
     return () => mediaQuery.removeEventListener("change", handleThemeChange);
-  }, []);
+  }, [isSystemTheme]);
+
+  // Apply theme to document element
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,6 +98,7 @@ const Portfolio = () => {
   }, []);
 
   const toggleDarkMode = () => {
+    setIsSystemTheme(false); // User is manually overriding system theme
     setDarkMode(!darkMode);
   };
 
@@ -107,7 +120,7 @@ const Portfolio = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -232,19 +245,9 @@ const Portfolio = () => {
   ];
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 ${
-        darkMode ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"
-      }`}
-    >
+    <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Navigation */}
-      <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          darkMode ? "bg-gray-900/95" : "bg-white/95"
-        } backdrop-blur-sm border-b ${
-          darkMode ? "border-gray-800" : "border-gray-200"
-        }`}
-      >
+      <nav className="fixed top-0 w-full z-50 transition-all duration-300 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -276,12 +279,8 @@ const Portfolio = () => {
 
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                darkMode
-                  ? "bg-gray-800 hover:bg-gray-700"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }`}
-              title="Toggle theme (currently synced with system)"
+              className="p-2 rounded-lg transition-colors duration-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+              title={`Switch to ${darkMode ? "light" : "dark"} mode`}
             >
               {darkMode ? (
                 <Sun className="w-5 h-5" />
@@ -298,13 +297,7 @@ const Portfolio = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-20">
             <div className="mb-8">
-              <div
-                className={`w-32 h-32 mx-auto rounded-full ${
-                  darkMode
-                    ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                    : "bg-gradient-to-br from-blue-400 to-purple-500"
-                } flex items-center justify-center text-4xl font-bold text-white mb-6`}
-              >
+              <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-4xl font-bold text-white mb-6">
                 EB
               </div>
             </div>
@@ -322,22 +315,14 @@ const Portfolio = () => {
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               <a
                 href="mailto:eklavyabhargawa@gmail.com"
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  darkMode
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-blue-600 hover:bg-blue-700"
-                } text-white font-medium hover:scale-105`}
+                className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white font-medium hover:scale-105"
               >
                 <Mail className="w-4 h-4" />
                 Get In Touch
               </a>
               <button
                 onClick={() => scrollToSection("projects")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  darkMode
-                    ? "border-2 border-gray-600 hover:bg-gray-800"
-                    : "border-2 border-gray-300 hover:bg-gray-50"
-                } font-medium hover:scale-105`}
+                className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium hover:scale-105"
               >
                 <Code className="w-4 h-4" />
                 View Projects
@@ -375,9 +360,7 @@ const Portfolio = () => {
       {/* About Section */}
       <section
         id="about"
-        className={`py-16 px-4 sm:px-6 lg:px-8 ${
-          darkMode ? "bg-gray-800/50" : "bg-gray-50"
-        }`}
+        className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800/50"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -411,11 +394,7 @@ const Portfolio = () => {
               </div>
             </div>
 
-            <div
-              className={`p-6 rounded-xl ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg">
               <h3 className="text-xl font-semibold mb-4">Quick Facts</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
@@ -462,9 +441,7 @@ const Portfolio = () => {
             {experiences.map((exp, index) => (
               <div
                 key={index}
-                className={`p-6 rounded-xl ${
-                  darkMode ? "bg-gray-800" : "bg-white"
-                } shadow-lg hover:shadow-xl transition-shadow duration-300`}
+                className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
                   <div>
@@ -510,9 +487,7 @@ const Portfolio = () => {
       {/* Projects Section */}
       <section
         id="projects"
-        className={`py-16 px-4 sm:px-6 lg:px-8 ${
-          darkMode ? "bg-gray-800/50" : "bg-gray-50"
-        }`}
+        className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800/50"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -526,9 +501,7 @@ const Portfolio = () => {
             {projects.map((project, index) => (
               <div
                 key={index}
-                className={`p-6 rounded-xl ${
-                  darkMode ? "bg-gray-800" : "bg-white"
-                } shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
+                className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-semibold">{project.title}</h3>
@@ -555,11 +528,7 @@ const Portfolio = () => {
                   {project.tech.map((tech, idx) => (
                     <span
                       key={idx}
-                      className={`px-3 py-1 text-xs rounded-full ${
-                        darkMode
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
+                      className="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       {tech}
                     </span>
@@ -590,11 +559,7 @@ const Portfolio = () => {
                     {skill.level}%
                   </span>
                 </div>
-                <div
-                  className={`w-full h-2 rounded-full ${
-                    darkMode ? "bg-gray-700" : "bg-gray-200"
-                  }`}
-                >
+                <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
                     className="h-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-1000"
                     style={{ width: `${skill.level}%` }}
@@ -609,9 +574,7 @@ const Portfolio = () => {
       {/* Education Section */}
       <section
         id="education"
-        className={`py-16 px-4 sm:px-6 lg:px-8 ${
-          darkMode ? "bg-gray-800/50" : "bg-gray-50"
-        }`}
+        className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800/50"
       >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -622,17 +585,9 @@ const Portfolio = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div
-              className={`p-6 rounded-xl ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg">
               <div className="flex items-start gap-4">
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-blue-600/20" : "bg-blue-100"
-                  }`}
-                >
+                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-600/20">
                   <GraduationCap className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
@@ -649,17 +604,9 @@ const Portfolio = () => {
               </div>
             </div>
 
-            <div
-              className={`p-6 rounded-xl ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg">
               <div className="flex items-start gap-4">
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-purple-600/20" : "bg-purple-100"
-                  }`}
-                >
+                <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-600/20">
                   <Award className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
@@ -679,17 +626,9 @@ const Portfolio = () => {
               </div>
             </div>
 
-            <div
-              className={`p-6 rounded-xl ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg md:col-span-2`}
-            >
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg md:col-span-2">
               <div className="flex items-start gap-4">
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-green-600/20" : "bg-green-100"
-                  }`}
-                >
+                <div className="p-3 rounded-lg bg-green-100 dark:bg-green-600/20">
                   <Award className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
@@ -732,17 +671,9 @@ const Portfolio = () => {
 
               <a
                 href="mailto:eklavyabhargawa@gmail.com"
-                className={`flex items-center gap-4 p-4 rounded-xl ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700"
-                    : "bg-white hover:bg-gray-50"
-                } shadow-lg transition-all duration-300 hover:scale-105`}
+                className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-lg transition-all duration-300 hover:scale-105"
               >
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-blue-600/20" : "bg-blue-100"
-                  }`}
-                >
+                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-600/20">
                   <Mail className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
@@ -755,17 +686,9 @@ const Portfolio = () => {
 
               <a
                 href="tel:+918825255902"
-                className={`flex items-center gap-4 p-4 rounded-xl ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700"
-                    : "bg-white hover:bg-gray-50"
-                } shadow-lg transition-all duration-300 hover:scale-105`}
+                className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-lg transition-all duration-300 hover:scale-105"
               >
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-green-600/20" : "bg-green-100"
-                  }`}
-                >
+                <div className="p-3 rounded-lg bg-green-100 dark:bg-green-600/20">
                   <Phone className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
@@ -776,16 +699,8 @@ const Portfolio = () => {
                 </div>
               </a>
 
-              <div
-                className={`flex items-center gap-4 p-4 rounded-xl ${
-                  darkMode ? "bg-gray-800" : "bg-white"
-                } shadow-lg`}
-              >
-                <div
-                  className={`p-3 rounded-lg ${
-                    darkMode ? "bg-purple-600/20" : "bg-purple-100"
-                  }`}
-                >
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 shadow-lg">
+                <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-600/20">
                   <MapPin className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
@@ -798,11 +713,7 @@ const Portfolio = () => {
             </div>
 
             {/* Contact Form */}
-            <div
-              className={`p-6 rounded-xl ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg relative overflow-hidden`}
-            >
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg relative overflow-hidden">
               <div className="relative md:h-[500px] h-[550px]">
                 {/* Contact Form */}
                 <div
@@ -829,11 +740,7 @@ const Portfolio = () => {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            darkMode
-                              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                              : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
-                          }`}
+                          className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                           placeholder="Your Name"
                         />
                       </div>
@@ -851,11 +758,7 @@ const Portfolio = () => {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            darkMode
-                              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                              : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
-                          }`}
+                          className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                           placeholder="your.email@example.com"
                         />
                       </div>
@@ -875,11 +778,7 @@ const Portfolio = () => {
                         value={formData.subject}
                         onChange={handleInputChange}
                         required
-                        className={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          darkMode
-                            ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                            : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
-                        }`}
+                        className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         placeholder="What's this about?"
                       />
                     </div>
@@ -898,11 +797,7 @@ const Portfolio = () => {
                         onChange={handleInputChange}
                         required
                         rows={4}
-                        className={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                          darkMode
-                            ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                            : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
-                        }`}
+                        className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         placeholder="Tell me about your project or just say hello!"
                       />
                     </div>
@@ -965,13 +860,7 @@ const Portfolio = () => {
       </section>
 
       {/* Footer */}
-      <footer
-        className={`py-8 px-4 sm:px-6 lg:px-8 border-t ${
-          darkMode
-            ? "border-gray-800 bg-gray-900"
-            : "border-gray-200 bg-gray-50"
-        }`}
-      >
+      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-gray-600 dark:text-gray-300">
             © 2025 Eklavya Bhargava. All rights reserved.
@@ -983,11 +872,7 @@ const Portfolio = () => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className={`fixed bottom-8 right-8 p-3 rounded-full ${
-            darkMode
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white shadow-lg transition-all duration-300 hover:scale-110 z-50`}
+          className="fixed bottom-8 right-8 p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-110 z-50"
         >
           <ArrowUp className="w-5 h-5" />
         </button>
