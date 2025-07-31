@@ -33,6 +33,24 @@ const Portfolio = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(true);
 
+  // Initialize theme based on system preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    // Set initial state based on system preference
+    setDarkMode(mediaQuery.matches);
+
+    // Listen for changes in system theme
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      setDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    // Cleanup listener on unmount
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
@@ -263,6 +281,7 @@ const Portfolio = () => {
                   ? "bg-gray-800 hover:bg-gray-700"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
+              title="Toggle theme (currently synced with system)"
             >
               {darkMode ? (
                 <Sun className="w-5 h-5" />
